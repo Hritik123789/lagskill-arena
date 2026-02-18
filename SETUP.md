@@ -27,10 +27,13 @@ npm run dev                      # Runs on http://localhost:5173
 
 ## Prerequisites
 
-- Python 3.10+
-- Node.js 18+
-- MongoDB (local or Atlas)
+**Tested and working with:**
+- Python 3.10, 3.11, 3.12
+- Node.js 18.x, 20.x, 22.x
+- MongoDB 6.0+ (local) or Atlas
 - Git
+
+**Note**: All dependency versions are locked in `requirements.txt` and `package.json` to avoid conflicts.
 
 ---
 
@@ -148,6 +151,39 @@ lagskill-arena/
 ---
 
 ## 🐛 Troubleshooting
+
+### Python version conflicts
+```bash
+# Check Python version
+python --version  # Should be 3.10+
+
+# If wrong version, use specific Python
+python3.11 -m venv venv
+```
+
+### Node version conflicts
+```bash
+# Check Node version
+node --version  # Should be 18+
+
+# If wrong version, use nvm (Node Version Manager)
+# Windows: https://github.com/coreybutler/nvm-windows
+# Mac/Linux: https://github.com/nvm-sh/nvm
+nvm install 20
+nvm use 20
+```
+
+### Dependency installation fails
+```bash
+# Backend: Clear cache and reinstall
+pip cache purge
+pip install -r requirements.txt --no-cache-dir
+
+# Frontend: Clear cache and reinstall
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+```
 
 ### Backend won't start
 - Check MongoDB is running
