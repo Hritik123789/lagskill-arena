@@ -1,5 +1,30 @@
 # 🚀 LagSkillArena - Setup Guide
 
+## ⚡ 5-Minute Quick Start
+
+```bash
+# 1. Clone
+git clone https://github.com/Hritik123789/lagskill-arena.git
+cd lagskill-arena
+
+# 2. Backend
+cd backend
+python -m venv venv
+.\venv\Scripts\activate          # Windows
+pip install -r requirements.txt
+copy .env.example .env           # Edit this file with your MongoDB URL
+python start.py                  # Runs on http://localhost:8000
+
+# 3. Frontend (new terminal)
+cd frontend
+npm install
+npm run dev                      # Runs on http://localhost:5173
+```
+
+**Login**: admin@lagskill.com / Admin@123
+
+---
+
 ## Prerequisites
 
 - Python 3.10+
@@ -9,12 +34,12 @@
 
 ---
 
-## 📦 Quick Setup
+## 📦 Detailed Setup
 
 ### 1. Clone Repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Hritik123789/lagskill-arena.git
 cd lagskill-arena
 ```
 
