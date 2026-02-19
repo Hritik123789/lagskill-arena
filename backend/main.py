@@ -1118,7 +1118,6 @@ async def analyze_video_internal(file: UploadFile):
             if r.boxes is not None:
                 for box, cls, conf in zip(r.boxes.xyxy, r.boxes.cls, r.boxes.conf):
                     if int(cls) == 0:  # 0 = person class
-                        persons_in_frame += 1
                         x1, y1, x2, y2 = map(int, box)
                         
                         # Calculate box properties
@@ -1127,6 +1126,8 @@ async def analyze_video_internal(file: UploadFile):
                         box_width = x2 - x1
                         box_height = y2 - y1
                         box_area = box_width * box_height
+                        
+                        persons_in_frame += 1
                         
                         # Estimate distance from camera based on box size
                         estimated_distance = 1000 / (box_height + 1)
