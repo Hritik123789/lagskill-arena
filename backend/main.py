@@ -2248,3 +2248,39 @@ async def download_highlight(filename: str):
             "Content-Disposition": f"attachment; filename={filename}"
         }
     )
+
+
+@app.get("/highlight-stats")
+async def get_highlight_stats():
+    """
+    Get global highlight generation statistics
+    """
+    try:
+        # Count total highlights generated
+        total_highlights = await db.highlight_sessions.count_documents({})
+        
+        # Count unique users (if they exist)
+        unique_users = len(await db.highlight_sessions.distinct("user_id"))
+        
+        # Get total moments detected
+        pipeline = [
+            {"$group": {
+                "_id": None,
+                "total_moments": {"$sum": "$num_highlights"}
+            }}
+        ]
+        result = await db.highlight_sessions.aggregate(pipeline).to_list(1)
+        total_moments = result[0]["total_moments"] if result else 0
+        
+        return {
+            "total_highlights_generated": total_highlights,
+            "total_moments_detected": total_moments,
+            "unique_users": unique_users if unique_users > 0 else total_highlights
+        }
+    except:
+        # Fallback if database not available
+        return {
+            "total_highlights_generated": 0,
+            "total_moments_detected": 0,
+            "unique_users": 0
+        }
