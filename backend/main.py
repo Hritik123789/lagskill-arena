@@ -2228,3 +2228,23 @@ async def generate_highlights_endpoint(
         ],
         "session_id": session_id
     }
+
+
+@app.get("/download-highlight/{filename}")
+async def download_highlight(filename: str):
+    """
+    Force download of highlight video file
+    """
+    file_path = os.path.join(OUTPUT_DIR, filename)
+    
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    return FileResponse(
+        path=file_path,
+        media_type='video/mp4',
+        filename=filename,
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}"
+        }
+    )

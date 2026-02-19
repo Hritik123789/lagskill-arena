@@ -254,13 +254,15 @@ export default function HighlightsPage() {
                     controls
                     className="w-full rounded-lg border border-purple-500/30"
                     src={`http://localhost:8000/outputs/${result.highlight_video}`}
-                  />
+                  >
+                    Your browser doesn't support video playback. Please download the file instead.
+                  </video>
+                  <p className="text-gray-400 text-sm mt-2">
+                    💡 If video doesn't play, use the download button or open in new tab
+                  </p>
                   <div className="flex gap-4 mt-4">
                     <a
-                      href={`http://localhost:8000/outputs/${result.highlight_video}`}
-                      download={result.highlight_video}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href={`http://localhost:8000/download-highlight/${result.highlight_video}`}
                       className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-bold"
                     >
                       ⬇️ Download Highlight Reel
@@ -275,6 +277,14 @@ export default function HighlightsPage() {
                     >
                       ✨ Generate Another
                     </button>
+                    <a
+                      href={`http://localhost:8000/outputs/${result.highlight_video}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-bold"
+                    >
+                      🎬 Open in New Tab
+                    </a>
                   </div>
                 </div>
 
