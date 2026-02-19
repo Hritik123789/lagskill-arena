@@ -16,6 +16,7 @@ import { SessionDetailPage } from './pages/SessionDetailPage';
 import { UpgradePage } from './pages/UpgradePage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import HighlightsPage from './pages/HighlightsPage';
+import HighlightHistoryPage from './pages/HighlightHistoryPage';
 import { AuthProvider } from './contexts/AuthContext';
 
 export default function App() {
@@ -31,6 +32,7 @@ export default function App() {
               <Route path="/how-it-works" element={<HowItWorksPage />} />
               <Route path="/demo" element={<DemoPage />} />
               <Route path="/highlights" element={<HighlightsPage />} />
+              <Route path="/my-highlights" element={<HighlightHistoryPage />} />
               <Route path="/report" element={<SessionReportPage />} />
               <Route path="/get-started" element={<GetStartedPage />} />
               <Route path="/about" element={<AboutPage />} />

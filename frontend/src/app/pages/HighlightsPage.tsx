@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Share2, Copy, Check, Youtube, Instagram } from 'lucide-react';
+import { Share2, Copy, Check, Youtube, Instagram, Film } from 'lucide-react';
 
 interface HighlightMoment {
   number: number;
@@ -214,9 +214,20 @@ export default function HighlightsPage() {
         
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-4">
-            🎬 Highlight Reel Generator
-          </h1>
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+              🎬 Highlight Reel Generator
+            </h1>
+            {user && (
+              <button
+                onClick={() => navigate('/my-highlights')}
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition flex items-center gap-2"
+              >
+                <Film className="w-4 h-4" />
+                My Highlights
+              </button>
+            )}
+          </div>
           <p className="text-xl text-gray-300">
             AI-powered automatic highlight detection from your gameplay
           </p>
