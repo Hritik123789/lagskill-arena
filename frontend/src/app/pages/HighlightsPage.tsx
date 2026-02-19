@@ -47,28 +47,29 @@ export default function HighlightsPage() {
 
     switch (platform) {
       case 'youtube':
-        // Open YouTube Studio upload page and copy description
+        // Auto-download, copy description, open YouTube Studio
         navigator.clipboard.writeText(`${shareText}\n\nGenerated with LagSkillArena - AI-powered highlight detection`);
-        // Trigger download
         window.open(downloadUrl, '_blank');
-        // Open YouTube Studio after a short delay
         setTimeout(() => {
           window.open('https://studio.youtube.com/channel/UC/videos/upload', '_blank');
         }, 500);
-        alert('✅ Video download started!\n📋 Description copied to clipboard!\n\n1. Wait for download to complete\n2. YouTube Studio will open\n3. Upload the downloaded video\n4. Paste the description');
+        alert('✅ Video downloading!\n📋 Description copied!\n🎬 YouTube Studio opening...');
         break;
       case 'instagram':
-        // Copy caption and trigger download
+        // Auto-download, copy caption, open Instagram
         navigator.clipboard.writeText(shareText);
         window.open(downloadUrl, '_blank');
-        alert('✅ Video download started!\n📋 Caption copied to clipboard!\n\n1. Wait for download to complete\n2. Open Instagram app on your phone\n3. Create a Reel or Story\n4. Upload the downloaded video\n5. Paste the caption');
+        setTimeout(() => {
+          window.open('https://www.instagram.com/', '_blank');
+        }, 500);
+        alert('✅ Video downloading!\n📋 Caption copied!\n📸 Instagram opening...\n\nNote: Use Instagram mobile app to upload Reels');
         break;
       case 'discord':
-        // Discord formatted message
+        // Copy message and open Discord
         const discordMessage = `${shareText}\n${videoUrl}`;
         navigator.clipboard.writeText(discordMessage);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        window.open('https://discord.com/channels/@me', '_blank');
+        alert('✅ Message copied!\n💬 Discord opening...\n\nPaste in your server or DM!');
         break;
       case 'copy':
         navigator.clipboard.writeText(videoUrl);
