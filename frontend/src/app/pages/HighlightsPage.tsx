@@ -68,10 +68,27 @@ export default function HighlightsPage() {
       clearInterval(progressInterval);
       setProgress(100);
 
+      if (!response.ok) {
+        if (response.status === 401) {
+          setResult({
+            status: 'error',
+            message: 'Please login to use the highlight generator.',
+          });
+        } else {
+          const errorData = await response.json();
+          setResult({
+            status: 'error',
+            message: errorData.detail || 'Failed to generate highlights.',
+          });
+        }
+        return;
+      }
+
       const data = await response.json();
       setResult(data);
     } catch (error) {
       console.error('Error generating highlights:', error);
+      clearInterval(progressInterval);
       setResult({
         status: 'error',
         message: 'Failed to generate highlights. Please try again.',
@@ -119,26 +136,30 @@ export default function HighlightsPage() {
     }
   };
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center p-4">
-        <div className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-lg border border-purple-500/30 text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">Login Required</h2>
-          <p className="text-gray-300 mb-6">Please login to generate highlight reels</p>
-          <button
-            onClick={() => navigate('/login')}
-            className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-6">
       <div className="max-w-6xl mx-auto">
+        {/* Guest Mode Warning */}
+        {!user && (
+          <div className="bg-yellow-900/30 border border-yellow-500/50 rounded-lg p-4 mb-6">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              <div>
+                <h3 className="text-yellow-400 font-bold">Guest Mode</h3>
+                <p className="text-yellow-200 text-sm">
+                  You're using as a guest. Highlights won't be saved.{' '}
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="underline hover:text-white font-bold"
+                  >
+                    Login to save
+                  </button>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-4">

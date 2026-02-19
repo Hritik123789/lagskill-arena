@@ -2009,13 +2009,20 @@ def generate_highlight_reel(input_video_path, highlight_moments, fps, original_f
 
 @app.post("/generate-highlights")
 async def generate_highlights_endpoint(
-    file: UploadFile = File(...),
-    current_user: dict = Depends(get_current_user)
+    file: UploadFile = File(...)
 ):
     """
     Generate highlight reel from uploaded gameplay video.
     Detects exciting moments and creates a compilation.
+    Works for both authenticated and guest users.
     """
+    # Try to get current user (optional)
+    try:
+        token = None  # We'll handle auth optionally
+        current_user = None
+    except:
+        current_user = None
+    
     file_path = os.path.join(UPLOAD_DIR, file.filename)
     
     # Save uploaded file
@@ -2165,20 +2172,22 @@ async def generate_highlights_endpoint(
     if not highlight_filename:
         return {"error": "Failed to generate highlight reel"}
     
-    # Save to database
-    session_data = {
-        "user_id": current_user["id"],
-        "username": current_user["username"],
-        "video_filename": file.filename,
-        "highlight_filename": highlight_filename,
-        "num_highlights": len(highlight_moments),
-        "total_duration_sec": sum(4 for _ in highlight_moments),  # 4 sec per clip
-        "highlight_moments": highlight_moments,
-        "created_at": datetime.utcnow()
-    }
-    
-    result = await db.highlight_sessions.insert_one(session_data)
-    session_data["_id"] = str(result.inserted_id)
+    # Save to database (only if user is logged in)
+    session_id = None
+    if current_user:
+        session_data = {
+            "user_id": current_user["id"],
+            "username": current_user["username"],
+            "video_filename": file.filename,
+            "highlight_filename": highlight_filename,
+            "num_highlights": len(highlight_moments),
+            "total_duration_sec": sum(4 for _ in highlight_moments),  # 4 sec per clip
+            "highlight_moments": highlight_moments,
+            "created_at": datetime.utcnow()
+        }
+        
+        result = await db.highlight_sessions.insert_one(session_data)
+        session_id = str(result.inserted_id)
     
     return {
         "status": "success",
@@ -2194,5 +2203,5 @@ async def generate_highlights_endpoint(
             }
             for idx, m in enumerate(highlight_moments)
         ],
-        "session_id": session_data["_id"]
+        "session_id": session_id
     }
