@@ -42,26 +42,33 @@ export default function HighlightsPage() {
     if (!result?.highlight_video) return;
 
     const videoUrl = `${window.location.origin}/outputs/${result.highlight_video}`;
+    const downloadUrl = `http://localhost:8000/download-highlight/${result.highlight_video}`;
     const shareText = `Check out my gaming highlights! 🎮 ${result.num_highlights} epic moments with a top score of ${result.moments ? Math.max(...result.moments.map(m => m.score)) : 0}! Generated with LagSkillArena`;
 
     switch (platform) {
       case 'youtube':
-        // YouTube doesn't have direct share, guide user to upload
-        const youtubeMessage = `Ready to upload to YouTube!\n\n📹 Video: ${result.highlight_video}\n📝 Suggested Title: "Epic Gaming Highlights - ${result.num_highlights} Best Moments"\n📝 Description: ${shareText}\n\n💡 Download the video and upload it to YouTube Studio!`;
-        navigator.clipboard.writeText(youtubeMessage);
-        alert('YouTube upload guide copied! 📹\n\n1. Download your highlight reel\n2. Go to YouTube Studio\n3. Upload the video\n4. Paste the copied description');
+        // Open YouTube Studio upload page and copy description
+        navigator.clipboard.writeText(`${shareText}\n\nGenerated with LagSkillArena - AI-powered highlight detection`);
+        // Trigger download
+        window.open(downloadUrl, '_blank');
+        // Open YouTube Studio after a short delay
+        setTimeout(() => {
+          window.open('https://studio.youtube.com/channel/UC/videos/upload', '_blank');
+        }, 500);
+        alert('✅ Video download started!\n📋 Description copied to clipboard!\n\n1. Wait for download to complete\n2. YouTube Studio will open\n3. Upload the downloaded video\n4. Paste the description');
         break;
       case 'instagram':
-        // Instagram doesn't have web share, guide user
-        const instaMessage = `Ready for Instagram! 📸\n\n${shareText}\n\n💡 Download the video and post it as a Reel or Story!`;
-        navigator.clipboard.writeText(instaMessage);
-        alert('Instagram caption copied! 📸\n\n1. Download your highlight reel\n2. Open Instagram app\n3. Create a Reel or Story\n4. Upload the video\n5. Paste the copied caption');
+        // Copy caption and trigger download
+        navigator.clipboard.writeText(shareText);
+        window.open(downloadUrl, '_blank');
+        alert('✅ Video download started!\n📋 Caption copied to clipboard!\n\n1. Wait for download to complete\n2. Open Instagram app on your phone\n3. Create a Reel or Story\n4. Upload the downloaded video\n5. Paste the caption');
         break;
       case 'discord':
         // Discord formatted message
         const discordMessage = `${shareText}\n${videoUrl}`;
         navigator.clipboard.writeText(discordMessage);
-        alert('Discord message copied! Paste it in your server 🎮');
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
         break;
       case 'copy':
         navigator.clipboard.writeText(videoUrl);
