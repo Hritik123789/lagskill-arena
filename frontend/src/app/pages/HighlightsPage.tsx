@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Share2, Twitter, Copy, Check } from 'lucide-react';
+import { Share2, Copy, Check, Youtube, Instagram } from 'lucide-react';
 
 interface HighlightMoment {
   number: number;
@@ -45,14 +45,20 @@ export default function HighlightsPage() {
     const shareText = `Check out my gaming highlights! 🎮 ${result.num_highlights} epic moments with a top score of ${result.moments ? Math.max(...result.moments.map(m => m.score)) : 0}! Generated with LagSkillArena`;
 
     switch (platform) {
-      case 'twitter':
-        window.open(
-          `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(videoUrl)}`,
-          '_blank'
-        );
+      case 'youtube':
+        // YouTube doesn't have direct share, guide user to upload
+        const youtubeMessage = `Ready to upload to YouTube!\n\n📹 Video: ${result.highlight_video}\n📝 Suggested Title: "Epic Gaming Highlights - ${result.num_highlights} Best Moments"\n📝 Description: ${shareText}\n\n💡 Download the video and upload it to YouTube Studio!`;
+        navigator.clipboard.writeText(youtubeMessage);
+        alert('YouTube upload guide copied! 📹\n\n1. Download your highlight reel\n2. Go to YouTube Studio\n3. Upload the video\n4. Paste the copied description');
+        break;
+      case 'instagram':
+        // Instagram doesn't have web share, guide user
+        const instaMessage = `Ready for Instagram! 📸\n\n${shareText}\n\n💡 Download the video and post it as a Reel or Story!`;
+        navigator.clipboard.writeText(instaMessage);
+        alert('Instagram caption copied! 📸\n\n1. Download your highlight reel\n2. Open Instagram app\n3. Create a Reel or Story\n4. Upload the video\n5. Paste the copied caption');
         break;
       case 'discord':
-        // Discord doesn't have a direct share URL, so we copy a formatted message
+        // Discord formatted message
         const discordMessage = `${shareText}\n${videoUrl}`;
         navigator.clipboard.writeText(discordMessage);
         alert('Discord message copied! Paste it in your server 🎮');
@@ -349,11 +355,18 @@ export default function HighlightsPage() {
                     </div>
                     <div className="flex flex-wrap gap-3">
                       <button
-                        onClick={() => handleShare('twitter')}
-                        className="px-4 py-2 bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white rounded-lg transition flex items-center gap-2"
+                        onClick={() => handleShare('youtube')}
+                        className="px-4 py-2 bg-[#FF0000] hover:bg-[#cc0000] text-white rounded-lg transition flex items-center gap-2"
                       >
-                        <Twitter className="w-4 h-4" />
-                        Share on Twitter
+                        <Youtube className="w-4 h-4" />
+                        Upload to YouTube
+                      </button>
+                      <button
+                        onClick={() => handleShare('instagram')}
+                        className="px-4 py-2 bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F77737] hover:opacity-90 text-white rounded-lg transition flex items-center gap-2"
+                      >
+                        <Instagram className="w-4 h-4" />
+                        Post on Instagram
                       </button>
                       <button
                         onClick={() => handleShare('discord')}
