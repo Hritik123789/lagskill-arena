@@ -2032,19 +2032,16 @@ def generate_highlight_reel(input_video_path, highlight_moments, fps, original_f
 
 @app.post("/generate-highlights")
 async def generate_highlights_endpoint(
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_active_user)
 ):
     """
     Generate highlight reel from uploaded gameplay video.
     Detects exciting moments and creates a compilation.
-    Works for both authenticated and guest users.
+    Requires authentication to save highlights.
     """
-    # Try to get current user (optional)
-    try:
-        token = None  # We'll handle auth optionally
-        current_user = None
-    except:
-        current_user = None
+    print(f"🎬 Generating highlights for: {file.filename}")
+    print(f"👤 User: {current_user.get('username', 'Unknown')}")
     
     file_path = os.path.join(UPLOAD_DIR, file.filename)
     
@@ -2195,9 +2192,9 @@ async def generate_highlights_endpoint(
     if not highlight_filename:
         return {"error": "Failed to generate highlight reel"}
     
-    # Save to database (only if user is logged in)
+    # Save to database
     session_id = None
-    if current_user:
+    try:
         highlight_sessions = get_collection("highlight_sessions")
         session_data = {
             "user_id": current_user["_id"],
@@ -2212,6 +2209,9 @@ async def generate_highlights_endpoint(
         
         result = await highlight_sessions.insert_one(session_data)
         session_id = str(result.inserted_id)
+        print(f"✅ Saved highlight to database with ID: {session_id}")
+    except Exception as e:
+        print(f"❌ Failed to save to database: {e}")
     
     return {
         "status": "success",
