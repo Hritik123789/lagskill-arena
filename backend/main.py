@@ -61,8 +61,21 @@ async def startup_db_client():
     # Create admin user if doesn't exist
     await create_admin_user()
 
-# Mount static files for outputs
-app.mount("/outputs", StaticFiles(directory=OUTPUT_DIR), name="outputs")
+# Mount static files for outputs with proper MIME types
+from fastapi.staticfiles import StaticFiles
+
+class VideoStaticFiles(StaticFiles):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+    
+    async def get_response(self, path: str, scope):
+        response = await super().get_response(path, scope)
+        if path.endswith('.mp4'):
+            response.headers['Content-Type'] = 'video/mp4'
+            response.headers['Accept-Ranges'] = 'bytes'
+        return response
+
+app.mount("/outputs", VideoStaticFiles(directory=OUTPUT_DIR), name="outputs")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
@@ -1951,9 +1964,14 @@ def generate_highlight_reel(input_video_path, highlight_moments, fps, original_f
     highlight_filename = f"highlights_{safe_filename}"
     highlight_path = os.path.join(OUTPUT_DIR, highlight_filename)
     
-    # Video writer
+    # Video writer - use same codec as main analysis (mp4v works for playback)
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     out = cv2.VideoWriter(highlight_path, fourcc, fps, (width, height))
+    
+    if not out.isOpened():
+        print(f"❌ Failed to create video writer for {highlight_path}")
+        cap.release()
+        return None
     
     clip_duration_sec = 4  # 4 seconds per highlight
     clip_frames = int(clip_duration_sec * fps)
