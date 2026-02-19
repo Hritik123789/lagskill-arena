@@ -20,7 +20,7 @@ from models import (
 )
 from auth import (
     get_password_hash, authenticate_user, create_access_token,
-    get_current_active_user, get_current_admin_user
+    get_current_active_user, get_current_admin_user, get_current_user
 )
 
 app = FastAPI(title="LagSkillArena API WITH AUTH", version="1.0.0")
