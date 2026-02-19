@@ -173,50 +173,52 @@ export default function HighlightsPage() {
           </p>
         </div>
 
-        {/* Upload Section */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg border border-purple-500/30 p-8 mb-6">
-          <h2 className="text-2xl font-bold text-white mb-4">📤 Upload Gameplay</h2>
-          
-          <div className="mb-6">
-            <label className="block text-gray-300 mb-2">Select Video File</label>
-            <input
-              type="file"
-              accept="video/*"
-              onChange={handleFileSelect}
-              className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-purple-500 focus:outline-none"
-              disabled={isProcessing}
-            />
-            {selectedFile && (
-              <p className="text-green-400 mt-2">
-                ✓ Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-              </p>
+        {/* Upload Section - Hide when results are shown */}
+        {!result && (
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg border border-purple-500/30 p-8 mb-6">
+            <h2 className="text-2xl font-bold text-white mb-4">📤 Upload Gameplay</h2>
+            
+            <div className="mb-6">
+              <label className="block text-gray-300 mb-2">Select Video File</label>
+              <input
+                type="file"
+                accept="video/*"
+                onChange={handleFileSelect}
+                className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-purple-500 focus:outline-none"
+                disabled={isProcessing}
+              />
+              {selectedFile && (
+                <p className="text-green-400 mt-2">
+                  ✓ Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              )}
+            </div>
+
+            <button
+              onClick={handleGenerate}
+              disabled={!selectedFile || isProcessing}
+              className={`w-full py-4 rounded-lg font-bold text-lg transition ${
+                !selectedFile || isProcessing
+                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white'
+              }`}
+            >
+              {isProcessing ? '🔄 Generating Highlights...' : '✨ Generate Highlight Reel'}
+            </button>
+
+            {isProcessing && (
+              <div className="mt-4">
+                <div className="w-full bg-gray-700 rounded-full h-4 overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 h-full transition-all duration-500"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <p className="text-center text-gray-300 mt-2">{progress}% - Analyzing gameplay...</p>
+              </div>
             )}
           </div>
-
-          <button
-            onClick={handleGenerate}
-            disabled={!selectedFile || isProcessing}
-            className={`w-full py-4 rounded-lg font-bold text-lg transition ${
-              !selectedFile || isProcessing
-                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white'
-            }`}
-          >
-            {isProcessing ? '🔄 Generating Highlights...' : '✨ Generate Highlight Reel'}
-          </button>
-
-          {isProcessing && (
-            <div className="mt-4">
-              <div className="w-full bg-gray-700 rounded-full h-4 overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 h-full transition-all duration-500"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              <p className="text-center text-gray-300 mt-2">{progress}% - Analyzing gameplay...</p>
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Results Section */}
         {result && (
@@ -253,13 +255,27 @@ export default function HighlightsPage() {
                     className="w-full rounded-lg border border-purple-500/30"
                     src={`http://localhost:8000/outputs/${result.highlight_video}`}
                   />
-                  <a
-                    href={`http://localhost:8000/outputs/${result.highlight_video}`}
-                    download
-                    className="mt-4 inline-block px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
-                  >
-                    ⬇️ Download Highlight Reel
-                  </a>
+                  <div className="flex gap-4 mt-4">
+                    <a
+                      href={`http://localhost:8000/outputs/${result.highlight_video}`}
+                      download={result.highlight_video}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-bold"
+                    >
+                      ⬇️ Download Highlight Reel
+                    </a>
+                    <button
+                      onClick={() => {
+                        setResult(null);
+                        setSelectedFile(null);
+                        setProgress(0);
+                      }}
+                      className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition font-bold"
+                    >
+                      ✨ Generate Another
+                    </button>
+                  </div>
                 </div>
 
                 {/* Moments Breakdown */}
