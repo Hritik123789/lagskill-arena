@@ -15,6 +15,7 @@ export function Navigation() {
     { path: '/features', label: 'Features' },
     { path: '/how-it-works', label: 'How It Works' },
     { path: '/demo', label: 'Demo' },
+    { path: '/highlights', label: '🎬 Highlights' },
     { path: '/leaderboard', label: 'Leaderboard' },
     { path: '/get-started', label: 'Get Started' },
     { path: '/about', label: 'About' },

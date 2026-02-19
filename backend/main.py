@@ -820,6 +820,191 @@ def generate_ai_tips(results: dict) -> list:
     
     return tips
 
+def detect_highlight_moments(timeline_data, enemy_encounters, reaction_times, fps, total_frames):
+    """
+    Detect exciting moments in gameplay for highlight reel
+    Returns list of moments with start/end frames and scores
+    """
+    moments = []
+    
+    # 1. KILL STREAKS - Multiple enemies in short time
+    for i, encounter in enumerate(enemy_encounters):
+        encounter_frame = encounter['frame']
+        enemies_in_window = encounter['new_persons']
+        
+        # Check for multiple enemies within 5 seconds
+        window_start = encounter_frame
+        window_end = encounter_frame + int(fps * 5)
+        
+        for j in range(i + 1, len(enemy_encounters)):
+            if enemy_encounters[j]['frame'] <= window_end:
+                enemies_in_window += enemy_encounters[j]['new_persons']
+        
+        # If 2+ enemies in 5 seconds, it's a highlight
+        if enemies_in_window >= 2:
+            moments.append({
+                'type': 'kill_streak',
+                'start_frame': max(0, encounter_frame - int(fps * 2)),  # 2 sec before
+                'end_frame': min(total_frames, window_end + int(fps * 1)),  # 1 sec after
+                'score': enemies_in_window * 30,  # Higher score for more enemies
+                'description': f'{enemies_in_window} enemies in quick succession'
+            })
+    
+    # 2. FAST REACTIONS - Quick eliminations
+    for rt in reaction_times:
+        if rt['reaction_time_ms'] < 800:  # Under 800ms is impressive
+            reaction_score = 100 - (rt['reaction_time_ms'] / 10)
+            moments.append({
+                'type': 'fast_reaction',
+                'start_frame': max(0, rt['encounter_frame'] - int(fps * 1.5)),
+                'end_frame': min(total_frames, rt['elimination_frame'] + int(fps * 1)),
+                'score': reaction_score,
+                'description': f'Quick elimination ({int(rt["reaction_time_ms"])}ms)'
+            })
+    
+    # 3. HIGH INTENSITY MOMENTS - Lots of movement/action
+    if len(timeline_data) > 0:
+        # Calculate motion intensity for each 3-second window
+        window_size = int(fps * 3)
+        for i in range(0, len(timeline_data) - window_size, int(fps)):
+            window = timeline_data[i:i + window_size]
+            avg_persons = sum(f['persons'] for f in window) / len(window)
+            avg_motion = sum(f['motion'] for f in window) / len(window)
+            
+            # High intensity = many persons + high motion
+            intensity_score = (avg_persons * 20) + (avg_motion / 5)
+            
+            if intensity_score > 50:  # Threshold for "exciting"
+                moments.append({
+                    'type': 'high_intensity',
+                    'start_frame': window[0]['frame'],
+                    'end_frame': window[-1]['frame'],
+                    'score': intensity_score,
+                    'description': f'Intense combat action'
+                })
+    
+    # 4. CLUTCH MOMENTS - Surviving against multiple enemies
+    # Look for frames with 3+ enemies where player survives for 5+ seconds
+    for i, frame_data in enumerate(timeline_data):
+        if frame_data['persons'] >= 3:
+            # Check if player survives next 5 seconds
+            survival_frames = int(fps * 5)
+            end_idx = min(len(timeline_data), i + survival_frames)
+            survived = True
+            
+            # Simple survival check: if enemies decrease, player likely survived
+            if end_idx < len(timeline_data):
+                if timeline_data[end_idx]['persons'] < frame_data['persons']:
+                    moments.append({
+                        'type': 'clutch',
+                        'start_frame': max(0, frame_data['frame'] - int(fps * 2)),
+                        'end_frame': min(total_frames, timeline_data[end_idx]['frame'] + int(fps * 1)),
+                        'score': frame_data['persons'] * 25,
+                        'description': f'Clutch vs {frame_data["persons"]} enemies'
+                    })
+    
+    # Remove overlapping moments (keep highest score)
+    moments = merge_overlapping_moments(moments)
+    
+    # Sort by score and take top 5
+    moments.sort(key=lambda x: x['score'], reverse=True)
+    top_moments = moments[:5]
+    
+    print(f"🎬 Detected {len(moments)} highlight moments, selected top {len(top_moments)}")
+    for m in top_moments:
+        print(f"   - {m['type']}: {m['description']} (score: {m['score']:.1f})")
+    
+    return top_moments
+
+def merge_overlapping_moments(moments):
+    """Merge overlapping moments, keeping the one with higher score"""
+    if len(moments) <= 1:
+        return moments
+    
+    # Sort by start frame
+    moments.sort(key=lambda x: x['start_frame'])
+    
+    merged = []
+    current = moments[0]
+    
+    for next_moment in moments[1:]:
+        # Check if overlapping
+        if next_moment['start_frame'] <= current['end_frame']:
+            # Keep the one with higher score
+            if next_moment['score'] > current['score']:
+                current = next_moment
+        else:
+            merged.append(current)
+            current = next_moment
+    
+    merged.append(current)
+    return merged
+
+def generate_highlight_reel(input_video_path, moments, fps, original_filename):
+    """
+    Generate a highlight reel video from selected moments
+    """
+    if len(moments) == 0:
+        print("⚠ No highlight moments to generate reel")
+        return None
+    
+    # Open input video
+    cap = cv2.VideoCapture(input_video_path)
+    if not cap.isOpened():
+        print("❌ Could not open video for highlight generation")
+        return None
+    
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    
+    # Create output path
+    highlight_filename = f"highlights_{original_filename}"
+    highlight_path = os.path.join(OUTPUT_DIR, highlight_filename)
+    
+    # Video writer
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    out = cv2.VideoWriter(highlight_path, fourcc, fps, (width, height))
+    
+    print(f"🎬 Generating highlight reel: {highlight_filename}")
+    
+    # Extract and write each moment
+    for idx, moment in enumerate(moments):
+        print(f"   Processing moment {idx + 1}/{len(moments)}: {moment['description']}")
+        
+        # Seek to start frame
+        cap.set(cv2.CAP_PROP_POS_FRAMES, moment['start_frame'])
+        
+        # Read and write frames for this moment
+        frames_to_write = moment['end_frame'] - moment['start_frame']
+        frames_written = 0
+        
+        while frames_written < frames_to_write:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            
+            # Add moment label overlay
+            label = f"#{idx + 1}: {moment['description']}"
+            cv2.rectangle(frame, (10, height - 50), (width - 10, height - 10), (0, 0, 0), -1)
+            cv2.putText(frame, label, (20, height - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+            
+            out.write(frame)
+            frames_written += 1
+        
+        # Add transition frame (black frame with text)
+        if idx < len(moments) - 1:  # Not last moment
+            transition_frame = np.zeros((height, width, 3), dtype=np.uint8)
+            cv2.putText(transition_frame, "NEXT HIGHLIGHT", (width // 2 - 150, height // 2), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
+            for _ in range(int(fps * 0.5)):  # 0.5 second transition
+                out.write(transition_frame)
+    
+    cap.release()
+    out.release()
+    
+    print(f"✅ Highlight reel generated: {highlight_filename}")
+    return highlight_filename
+
 @app.post("/analyze-video-vision")
 async def analyze_video_vision(file: UploadFile = File(...)):
     """Analyze video (public demo)"""
@@ -1642,3 +1827,372 @@ async def download_video(filename: str):
     if not os.path.exists(file_path):
         return {"error": "File not found"}
     return FileResponse(file_path, media_type="video/mp4", filename=filename)
+
+
+# ============================================
+# HIGHLIGHT REEL GENERATION
+# ============================================
+
+def detect_highlight_moments(timeline_data, enemy_encounters, reaction_times, fps, total_frames):
+    """
+    Detect exciting moments in gameplay based on multiple factors:
+    - High enemy activity (multiple enemies)
+    - Quick eliminations (fast reaction times)
+    - Intense combat (high motion + enemies)
+    - Clutch moments (surviving intense situations)
+    """
+    highlights = []
+    
+    # Score each moment in the timeline
+    for i, frame_data in enumerate(timeline_data):
+        frame_num = frame_data['frame']
+        time_sec = frame_data['time']
+        persons = frame_data['persons']
+        motion = frame_data['motion']
+        
+        excitement_score = 0
+        moment_type = []
+        
+        # Factor 1: Multiple enemies (high person count)
+        if persons >= 3:
+            excitement_score += 30 * persons
+            moment_type.append("multi_enemy")
+        elif persons >= 2:
+            excitement_score += 20 * persons
+            moment_type.append("combat")
+        
+        # Factor 2: High motion (intense action)
+        if motion > 15:
+            excitement_score += motion * 2
+            moment_type.append("intense_action")
+        
+        # Factor 3: Enemy encounter nearby
+        for encounter in enemy_encounters:
+            frames_diff = abs(frame_num - encounter['frame'])
+            if frames_diff < fps * 2:  # Within 2 seconds
+                excitement_score += 40
+                moment_type.append("enemy_encounter")
+                break
+        
+        # Factor 4: Quick elimination nearby
+        for rt in reaction_times:
+            frames_diff = abs(frame_num - rt['elimination_frame'])
+            if frames_diff < fps * 1:  # Within 1 second
+                # Bonus for fast reactions
+                if rt['reaction_time_ms'] < 300:
+                    excitement_score += 50
+                    moment_type.append("quick_kill")
+                else:
+                    excitement_score += 30
+                    moment_type.append("elimination")
+                break
+        
+        # Store if exciting enough
+        if excitement_score > 50:
+            highlights.append({
+                'frame': frame_num,
+                'time_sec': time_sec,
+                'score': excitement_score,
+                'types': moment_type,
+                'persons': persons,
+                'motion': motion
+            })
+    
+    # Merge nearby highlights (avoid overlapping clips)
+    merged_highlights = []
+    if highlights:
+        highlights.sort(key=lambda x: x['score'], reverse=True)
+        
+        for highlight in highlights:
+            # Check if too close to existing highlight
+            too_close = False
+            for existing in merged_highlights:
+                time_diff = abs(highlight['time_sec'] - existing['time_sec'])
+                if time_diff < 5:  # Less than 5 seconds apart
+                    too_close = True
+                    # Keep the higher score
+                    if highlight['score'] > existing['score']:
+                        merged_highlights.remove(existing)
+                        too_close = False
+                    break
+            
+            if not too_close:
+                merged_highlights.append(highlight)
+        
+        # Sort by time
+        merged_highlights.sort(key=lambda x: x['time_sec'])
+        
+        # Limit to top 5 moments
+        merged_highlights = merged_highlights[:5]
+    
+    return merged_highlights
+
+def generate_highlight_reel(input_video_path, highlight_moments, fps, original_filename):
+    """
+    Generate a highlight reel video from detected moments.
+    Each moment gets 3-5 seconds of footage.
+    """
+    if not highlight_moments:
+        return None
+    
+    cap = cv2.VideoCapture(input_video_path)
+    if not cap.isOpened():
+        return None
+    
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    
+    # Create output path
+    highlight_filename = f"highlights_{original_filename}"
+    highlight_path = os.path.join(OUTPUT_DIR, highlight_filename)
+    
+    # Video writer
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    out = cv2.VideoWriter(highlight_path, fourcc, fps, (width, height))
+    
+    clip_duration_sec = 4  # 4 seconds per highlight
+    clip_frames = int(clip_duration_sec * fps)
+    
+    for idx, moment in enumerate(highlight_moments):
+        center_frame = moment['frame']
+        start_frame = max(0, center_frame - clip_frames // 2)
+        end_frame = start_frame + clip_frames
+        
+        # Seek to start frame
+        cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
+        
+        frames_written = 0
+        while frames_written < clip_frames:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            
+            # Add highlight overlay
+            overlay_text = f"Highlight #{idx + 1}"
+            moment_types = ", ".join(moment['types'][:2])  # Show first 2 types
+            score_text = f"Score: {int(moment['score'])}"
+            
+            # Draw semi-transparent overlay at top
+            overlay = frame.copy()
+            cv2.rectangle(overlay, (0, 0), (width, 80), (0, 0, 0), -1)
+            cv2.addWeighted(overlay, 0.6, frame, 0.4, 0, frame)
+            
+            # Draw text
+            cv2.putText(frame, overlay_text, (20, 30), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 255), 2)
+            cv2.putText(frame, moment_types.upper(), (20, 60), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            
+            # Draw progress bar
+            progress = frames_written / clip_frames
+            bar_width = int(progress * (width - 40))
+            cv2.rectangle(frame, (20, height - 30), (20 + bar_width, height - 20), 
+                         (0, 255, 255), -1)
+            
+            out.write(frame)
+            frames_written += 1
+        
+        # Add transition frame (black frame with "Next Highlight")
+        if idx < len(highlight_moments) - 1:
+            transition_frames = int(fps * 0.5)  # 0.5 second transition
+            black_frame = np.zeros((height, width, 3), dtype=np.uint8)
+            cv2.putText(black_frame, "NEXT HIGHLIGHT", 
+                       (width // 2 - 150, height // 2), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
+            for _ in range(transition_frames):
+                out.write(black_frame)
+    
+    cap.release()
+    out.release()
+    
+    return highlight_filename
+
+@app.post("/generate-highlights")
+async def generate_highlights_endpoint(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Generate highlight reel from uploaded gameplay video.
+    Detects exciting moments and creates a compilation.
+    """
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    
+    # Save uploaded file
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    
+    cap = cv2.VideoCapture(file_path)
+    if not cap.isOpened():
+        return {"error": "Could not open video"}
+    
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    
+    frame_count = 0
+    timeline_data = []
+    enemy_encounters = []
+    reaction_times = []
+    motion_scores = []
+    prev_gray = None
+    prev_person_count = 0
+    prev_person_boxes = []
+    
+    # Quick analysis pass (no annotation, just detection)
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        
+        frame_count += 1
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        
+        # Calculate motion
+        if prev_gray is not None:
+            diff = cv2.absdiff(gray, prev_gray)
+            motion = np.mean(diff)
+            motion_scores.append(motion)
+        prev_gray = gray
+        
+        # Run YOLO
+        results = yolo_model(frame, verbose=False, conf=0.3)
+        
+        persons_in_frame = 0
+        current_person_boxes = []
+        frame_detections = []
+        
+        for r in results:
+            if r.boxes is not None:
+                for box, cls, conf in zip(r.boxes.xyxy, r.boxes.cls, r.boxes.conf):
+                    if int(cls) == 0:  # person
+                        persons_in_frame += 1
+                        x1, y1, x2, y2 = map(int, box)
+                        box_center_x = (x1 + x2) / 2
+                        box_center_y = (y1 + y2) / 2
+                        
+                        current_person_boxes.append({
+                            'center_x': box_center_x,
+                            'center_y': box_center_y,
+                            'conf': float(conf)
+                        })
+                        
+                        frame_detections.append({
+                            'x': int(box_center_x),
+                            'y': int(box_center_y),
+                            'confidence': float(conf)
+                        })
+        
+        # Store timeline data
+        timeline_data.append({
+            'frame': frame_count,
+            'time': frame_count / fps if fps > 0 else 0,
+            'persons': persons_in_frame,
+            'motion': float(motion_scores[-1]) if motion_scores else 0,
+            'detections': frame_detections
+        })
+        
+        # Detect enemy encounters
+        if persons_in_frame > prev_person_count:
+            new_boxes = []
+            for curr_box in current_person_boxes:
+                is_new = True
+                for prev_box in prev_person_boxes:
+                    dist = np.sqrt(
+                        (curr_box['center_x'] - prev_box['center_x'])**2 + 
+                        (curr_box['center_y'] - prev_box['center_y'])**2
+                    )
+                    if dist < 100:
+                        is_new = False
+                        break
+                if is_new:
+                    new_boxes.append(curr_box)
+            
+            if len(new_boxes) > 0:
+                enemy_encounters.append({
+                    'frame': frame_count,
+                    'time_sec': frame_count / fps if fps > 0 else 0,
+                    'new_persons': len(new_boxes),
+                    'boxes': new_boxes
+                })
+        
+        # Track eliminations
+        if persons_in_frame < prev_person_count and len(enemy_encounters) > 0:
+            last_encounter = enemy_encounters[-1]
+            frames_since = frame_count - last_encounter['frame']
+            if 0 < frames_since < (fps * 3):
+                reaction_time_ms = (frames_since / fps) * 1000 if fps > 0 else 0
+                reaction_times.append({
+                    'encounter_frame': last_encounter['frame'],
+                    'elimination_frame': frame_count,
+                    'reaction_time_ms': reaction_time_ms
+                })
+        
+        prev_person_count = persons_in_frame
+        prev_person_boxes = current_person_boxes
+    
+    cap.release()
+    
+    # Detect highlight moments
+    highlight_moments = detect_highlight_moments(
+        timeline_data,
+        enemy_encounters,
+        reaction_times,
+        fps,
+        total_frames
+    )
+    
+    if not highlight_moments:
+        return {
+            "status": "no_highlights",
+            "message": "No exciting moments detected in this video. Try uploading gameplay with more action!",
+            "suggestions": [
+                "Include combat sequences",
+                "Upload longer gameplay (2-5 minutes)",
+                "Ensure video has clear enemy encounters"
+            ]
+        }
+    
+    # Generate highlight reel
+    highlight_filename = generate_highlight_reel(
+        file_path,
+        highlight_moments,
+        fps,
+        file.filename
+    )
+    
+    if not highlight_filename:
+        return {"error": "Failed to generate highlight reel"}
+    
+    # Save to database
+    session_data = {
+        "user_id": current_user["id"],
+        "username": current_user["username"],
+        "video_filename": file.filename,
+        "highlight_filename": highlight_filename,
+        "num_highlights": len(highlight_moments),
+        "total_duration_sec": sum(4 for _ in highlight_moments),  # 4 sec per clip
+        "highlight_moments": highlight_moments,
+        "created_at": datetime.utcnow()
+    }
+    
+    result = await db.highlight_sessions.insert_one(session_data)
+    session_data["_id"] = str(result.inserted_id)
+    
+    return {
+        "status": "success",
+        "highlight_video": highlight_filename,
+        "num_highlights": len(highlight_moments),
+        "total_duration_sec": len(highlight_moments) * 4,
+        "moments": [
+            {
+                "number": idx + 1,
+                "time_sec": round(m['time_sec'], 1),
+                "score": int(m['score']),
+                "types": m['types']
+            }
+            for idx, m in enumerate(highlight_moments)
+        ],
+        "session_id": session_data["_id"]
+    }
