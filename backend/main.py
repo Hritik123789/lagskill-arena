@@ -2,6 +2,7 @@ from fastapi import FastAPI, File, UploadFile, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
 from datetime import datetime, timedelta
 import shutil
 import os
@@ -59,6 +60,9 @@ async def startup_db_client():
     await connect_to_mongo()
     # Create admin user if doesn't exist
     await create_admin_user()
+
+# Mount static files for outputs
+app.mount("/outputs", StaticFiles(directory=OUTPUT_DIR), name="outputs")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
@@ -1942,8 +1946,9 @@ def generate_highlight_reel(input_video_path, highlight_moments, fps, original_f
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     
-    # Create output path
-    highlight_filename = f"highlights_{original_filename}"
+    # Create output path with sanitized filename (remove spaces and special chars)
+    safe_filename = original_filename.replace(" ", "_").replace("%", "")
+    highlight_filename = f"highlights_{safe_filename}"
     highlight_path = os.path.join(OUTPUT_DIR, highlight_filename)
     
     # Video writer
