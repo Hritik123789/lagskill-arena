@@ -2200,7 +2200,7 @@ async def generate_highlights_endpoint(
     if current_user:
         highlight_sessions = get_collection("highlight_sessions")
         session_data = {
-            "user_id": current_user["id"],
+            "user_id": current_user["_id"],
             "username": current_user["username"],
             "video_filename": file.filename,
             "highlight_filename": highlight_filename,
@@ -2297,7 +2297,7 @@ async def get_my_highlights(current_user: dict = Depends(get_current_user)):
     try:
         highlight_sessions = get_collection("highlight_sessions")
         highlights = await highlight_sessions.find(
-            {"user_id": current_user["id"]}
+            {"user_id": current_user["_id"]}
         ).sort("created_at", -1).to_list(100)  # Last 100 highlights
         
         # Convert ObjectId to string
