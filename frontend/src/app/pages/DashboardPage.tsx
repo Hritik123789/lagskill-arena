@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Activity, Target, Clock, TrendingUp, BarChart3, Shield, Award, Zap, AlertTriangle, CheckCircle, Trophy, Crown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_URL } from '../../config';
 
 interface Session {
   id: string;
@@ -32,8 +33,6 @@ export function DashboardPage() {
 
   console.log('DashboardPage: user =', user);
   console.log('DashboardPage: user?.is_pro =', user?.is_pro);
-
-  const API_URL = 'http://localhost:8000';
 
   useEffect(() => {
     if (!user || !token) {

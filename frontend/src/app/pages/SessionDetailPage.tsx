@@ -8,6 +8,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import domtoimage from 'dom-to-image-more';
 import { HeatMapVisualization } from '../components/HeatMapVisualization';
+import { API_URL } from '../../config';
 import { TimelineVisualization } from '../components/TimelineVisualization';
 
 interface SessionDetail {
@@ -93,8 +94,6 @@ export function SessionDetailPage() {
   const [error, setError] = useState('');
   const [exporting, setExporting] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
-
-  const API_URL = 'http://localhost:8000';
 
   useEffect(() => {
     console.log('SessionDetailPage: user =', user);

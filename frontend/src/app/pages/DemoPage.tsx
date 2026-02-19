@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Target, Upload, Play, BarChart3, Clock, Crosshair, TrendingUp, Zap, Activity, Award, Users, Gamepad2, Download } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_URL } from '../../config';
 
 // Game presets
 const GAME_PRESETS = [
@@ -712,8 +713,6 @@ function VideoUploadDemo({ selectedGame }: { selectedGame: typeof GAME_PRESETS[0
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user, token } = useAuth();
 
-  const API_URL = 'http://localhost:8000';
-
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
@@ -881,7 +880,7 @@ function VideoUploadDemo({ selectedGame }: { selectedGame: typeof GAME_PRESETS[0
           {error && (
             <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-4">
               <p className="text-red-400 text-sm">{error}</p>
-              <p className="text-xs text-gray-400 mt-2">Make sure the backend is running on http://localhost:8000</p>
+              <p className="text-xs text-gray-400 mt-2">Make sure the backend is running</p>
             </div>
           )}
 

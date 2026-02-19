@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Trophy, Medal, Crown, TrendingUp, Zap, Target } from 'lucide-react';
+import { API_URL } from '../../config';
 
 interface LeaderboardEntry {
   rank: number;
@@ -24,7 +25,7 @@ export default function LeaderboardPage() {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://localhost:8000/api/leaderboard?game_preset=${selectedGame}&limit=100`
+        `${API_URL}/api/leaderboard?game_preset=${selectedGame}&limit=100`
       );
       const data = await response.json();
       setLeaderboard(data.leaderboard || []);

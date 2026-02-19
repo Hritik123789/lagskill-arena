@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Film, Calendar, Award, Download, ExternalLink, Trash2 } from 'lucide-react';
+import { API_URL } from '../../config';
 
 interface Highlight {
   _id: string;
@@ -37,7 +38,7 @@ export default function HighlightHistoryPage() {
   const fetchHighlights = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/my-highlights', {
+      const response = await fetch(`${API_URL}/my-highlights`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -157,7 +158,7 @@ export default function HighlightHistoryPage() {
                 <div className="relative bg-gray-900 aspect-video">
                   <video
                     className="w-full h-full object-cover"
-                    src={`http://localhost:8000/outputs/${highlight.highlight_filename}`}
+                    src={`${API_URL}/outputs/${highlight.highlight_filename}`}
                     poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225'%3E%3Crect fill='%23111827' width='400' height='225'/%3E%3C/svg%3E"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
@@ -190,14 +191,14 @@ export default function HighlightHistoryPage() {
                   {/* Actions */}
                   <div className="flex gap-2">
                     <a
-                      href={`http://localhost:8000/download-highlight/${highlight.highlight_filename}`}
+                      href={`${API_URL}/download-highlight/${highlight.highlight_filename}`}
                       className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition flex items-center justify-center gap-2 text-sm font-bold"
                     >
                       <Download className="w-4 h-4" />
                       Download
                     </a>
                     <a
-                      href={`http://localhost:8000/outputs/${highlight.highlight_filename}`}
+                      href={`${API_URL}/outputs/${highlight.highlight_filename}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center justify-center"

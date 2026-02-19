@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Crown, Check, Zap, TrendingUp, BarChart3, Download, Lock, Sparkles } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
+import { API_URL } from '../../config';
 
 export function UpgradePage() {
   const { user, token, refreshUser } = useAuth();
@@ -9,8 +10,6 @@ export function UpgradePage() {
   const [upgrading, setUpgrading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
-
-  const API_URL = 'http://localhost:8000';
 
   const handleUpgrade = async () => {
     if (!token) {

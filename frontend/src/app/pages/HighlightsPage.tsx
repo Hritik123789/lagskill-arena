@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Share2, Copy, Check, Youtube, Instagram, Film } from 'lucide-react';
+import { API_URL } from '../../config';
 
 interface HighlightMoment {
   number: number;
@@ -32,7 +33,7 @@ export default function HighlightsPage() {
 
   // Fetch stats on mount
   React.useEffect(() => {
-    fetch('http://localhost:8000/highlight-stats')
+    fetch(`${API_URL}/highlight-stats`)
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(() => {});
@@ -42,7 +43,7 @@ export default function HighlightsPage() {
     if (!result?.highlight_video) return;
 
     const videoUrl = `${window.location.origin}/outputs/${result.highlight_video}`;
-    const downloadUrl = `http://localhost:8000/download-highlight/${result.highlight_video}`;
+    const downloadUrl = `${API_URL}/download-highlight/${result.highlight_video}`;
     const shareText = `Check out my gaming highlights! 🎮 ${result.num_highlights} epic moments with a top score of ${result.moments ? Math.max(...result.moments.map(m => m.score)) : 0}! Generated with LagSkillArena`;
 
     switch (platform) {
@@ -109,7 +110,7 @@ export default function HighlightsPage() {
       formData.append('file', selectedFile);
 
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/generate-highlights', {
+      const response = await fetch(`${API_URL}/generate-highlights`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -330,7 +331,7 @@ export default function HighlightsPage() {
                   <video
                     controls
                     className="w-full rounded-lg border border-purple-500/30"
-                    src={`http://localhost:8000/outputs/${result.highlight_video}`}
+                    src={`${API_URL}/outputs/${result.highlight_video}`}
                   >
                     Your browser doesn't support video playback. Please download the file instead.
                   </video>
@@ -341,7 +342,7 @@ export default function HighlightsPage() {
                   {/* Action Buttons */}
                   <div className="flex flex-wrap gap-3 mt-4">
                     <a
-                      href={`http://localhost:8000/download-highlight/${result.highlight_video}`}
+                      href={`${API_URL}/download-highlight/${result.highlight_video}`}
                       className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-bold flex items-center gap-2"
                     >
                       ⬇️ Download
@@ -357,7 +358,7 @@ export default function HighlightsPage() {
                       ✨ Generate Another
                     </button>
                     <a
-                      href={`http://localhost:8000/outputs/${result.highlight_video}`}
+                      href={`${API_URL}/outputs/${result.highlight_video}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-bold"
