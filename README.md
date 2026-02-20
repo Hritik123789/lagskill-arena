@@ -214,7 +214,6 @@ See [SETUP.md](SETUP.md) troubleshooting section.
 
 ## 📊 Project Stats
 
-- **Lines of Code**: 8,000+
 - **Components**: 25+
 - **API Endpoints**: 15+
 - **Supported Games**: 5
