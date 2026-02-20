@@ -5,8 +5,16 @@
 Analyze your gameplay with advanced AI to identify whether your performance is limited by skills or hardware. Get real-time player tracking, heat maps, timeline analysis, and personalized coaching.
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
-![Status](https://img.shields.io/badge/status-hackathon%20ready-green)
+![Status](https://img.shields.io/badge/status-live-green)
 ![License](https://img.shields.io/badge/license-MIT-orange)
+
+## 🌐 Live Demo
+
+**🚀 [Try LagSkillArena Now](https://lagskill-arena-gaming-hritik123789s-projects.vercel.app)**
+
+- Demo Account: `admin@lagskill.com` / `Admin@123`
+- Backend API: `https://lagskill-arena.onrender.com`
+- API Docs: `https://lagskill-arena.onrender.com/docs`
 
 ---
 
@@ -144,20 +152,25 @@ Strong positioning and reaction times. Consider:
 
 ## 🗺️ Roadmap
 
-### ✅ Completed
-- YOLO player/enemy detection
-- Heat map visualization
-- Timeline analysis
-- User authentication
-- Leaderboard system
-- Pro features
-- Admin panel
+### ✅ Completed (v1.0)
+- ✅ YOLO v8 player/enemy detection
+- ✅ Heat map visualization
+- ✅ Timeline analysis
+- ✅ User authentication & JWT
+- ✅ Global leaderboard
+- ✅ Pro features & credits system
+- ✅ Admin panel
+- ✅ Highlight reel generator
+- ✅ Social sharing features
+- ✅ Full deployment (Vercel + Render)
 
-### 🔜 Next
-- Live gameplay analysis
-- Team coordination tracking
-- Custom model training
-- Mobile app
+### 🔜 Coming Soon (v2.0)
+- 🔄 Live gameplay analysis
+- 🔄 Team coordination tracking
+- 🔄 Custom model training per game
+- 🔄 Mobile app (iOS/Android)
+- 🔄 Twitch/YouTube integration
+- 🔄 Advanced aim analysis
 
 [View Full Roadmap](ROADMAP.md)
 
@@ -165,10 +178,8 @@ Strong positioning and reaction times. Consider:
 
 ## 📝 Documentation
 
-- [SETUP.md](SETUP.md) - Installation guide
-- [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) - Production deployment
-- [DEMO_CHEAT_SHEET.md](DEMO_CHEAT_SHEET.md) - Demo preparation
-- [FINAL_FEATURE_STATUS.md](FINAL_FEATURE_STATUS.md) - Complete feature list
+- [SETUP.md](SETUP.md) - Local development setup
+- [ROADMAP.md](ROADMAP.md) - Future features and plans
 
 ---
 
@@ -217,7 +228,7 @@ See [SETUP.md](SETUP.md) troubleshooting section.
 
 Made with ❤️ for gamers who want to improve
 
-[Setup Guide](SETUP.md) • [Features](FINAL_FEATURE_STATUS.md) • [Roadmap](ROADMAP.md)
+**🌐 [Live Demo](https://lagskill-arena-gaming-hritik123789s-projects.vercel.app)** • [Setup Guide](SETUP.md) • [Roadmap](ROADMAP.md)
 
 **Happy Gaming! 🎮🚀**
 
