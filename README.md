@@ -175,7 +175,7 @@ Strong positioning and reaction times. Consider:
 
 ## 📝 Documentation
 
-- [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) - Complete project details, market analysis, and future scope
+- [PROJECT_OVERVIEW.pdf](PROJECT_OVERVIEW.pdf) - Complete project details, market analysis, and future scope
 - [SETUP.md](SETUP.md) - Local development setup
 - [ROADMAP.md](ROADMAP.md) - Future features and plans
 
