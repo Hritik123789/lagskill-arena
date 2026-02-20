@@ -194,7 +194,7 @@ Contributions welcome! Areas of interest:
 
 ---
 
-## 📞 Support
+## Need help with
 
 **Common Issues:**
 - Backend won't start: Check MongoDB connection in `.env`
