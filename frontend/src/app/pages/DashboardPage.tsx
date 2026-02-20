@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Activity, Target, Clock, TrendingUp, BarChart3, Shield, Award, Zap, AlertTriangle, CheckCircle, Trophy, Crown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { API_URL } from '../../config';
+import { API_URL } from '../../config.ts';
 
 interface Session {
   id: string;

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Target, Upload, Play, BarChart3, Clock, Crosshair, TrendingUp, Zap, Activity, Award, Users, Gamepad2, Download } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { API_URL } from '../../config';
+import { API_URL } from '../../config.ts';
 
 // Game presets
 const GAME_PRESETS = [
@@ -102,16 +102,9 @@ export function DemoPage() {
 }
 
 function ReactionTest({ selectedGame }: { selectedGame: typeof GAME_PRESETS[0] }) {
-  const [selectedMode, setSelectedMode] = useState<'click' | 'target' | 'precision'>('click');
+  const [selectedMode, setSelectedMode] = useState<'target' | 'precision'>('target');
 
   const modes = [
-    {
-      id: 'click' as const,
-      name: 'Click Reaction',
-      description: 'Click when the screen turns green',
-      icon: Zap,
-      color: 'blue'
-    },
     {
       id: 'target' as const,
       name: 'Target Tracking',
@@ -160,7 +153,6 @@ function ReactionTest({ selectedGame }: { selectedGame: typeof GAME_PRESETS[0] }
       </div>
 
       {/* Render selected game mode */}
-      {selectedMode === 'click' && <ClickReactionGame selectedGame={selectedGame} />}
       {selectedMode === 'target' && <TargetTrackingGame selectedGame={selectedGame} />}
       {selectedMode === 'precision' && <PrecisionClickingGame selectedGame={selectedGame} />}
     </div>

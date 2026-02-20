@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Users, Activity, Trash2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { API_URL } from '../../config';
+import { API_URL } from '../../config.ts';
 
 interface User {
   id: string;

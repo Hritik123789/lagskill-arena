@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Trophy, Medal, Crown, TrendingUp, Zap, Target } from 'lucide-react';
-import { API_URL } from '../../config';
+import { API_URL } from '../../config.ts';
 
 interface LeaderboardEntry {
   rank: number;

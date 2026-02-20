@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Film, Calendar, Award, Download, ExternalLink, Trash2 } from 'lucide-react';
-import { API_URL } from '../../config';
+import { API_URL } from '../../config.ts';
 
 interface Highlight {
   _id: string;

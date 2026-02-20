@@ -8,7 +8,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import domtoimage from 'dom-to-image-more';
 import { HeatMapVisualization } from '../components/HeatMapVisualization';
-import { API_URL } from '../../config';
+import { API_URL } from '../../config.ts';
 import { TimelineVisualization } from '../components/TimelineVisualization';
 
 interface SessionDetail {

@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Crown, Check, Zap, TrendingUp, BarChart3, Download, Lock, Sparkles } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
-import { API_URL } from '../../config';
+import { API_URL } from '../../config.ts';
 
 export function UpgradePage() {
   const { user, token, refreshUser } = useAuth();

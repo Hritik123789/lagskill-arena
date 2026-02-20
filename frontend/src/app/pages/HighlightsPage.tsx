@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Share2, Copy, Check, Youtube, Instagram, Film } from 'lucide-react';
-import { API_URL } from '../../config';
+import { API_URL } from '../../config.ts';
 
 interface HighlightMoment {
   number: number;
