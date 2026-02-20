@@ -4,9 +4,6 @@
 
 Analyze your gameplay with advanced AI to identify whether your performance is limited by skills or hardware. Get real-time player tracking, heat maps, timeline analysis, and personalized coaching.
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
-![Status](https://img.shields.io/badge/status-live-green)
-![License](https://img.shields.io/badge/license-MIT-orange)
 
 ## 🌐 Live Demo
 
