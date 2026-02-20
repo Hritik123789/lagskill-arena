@@ -69,6 +69,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const response = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       body: formData,
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+      },
     });
 
     if (!response.ok) {
@@ -85,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const userResponse = await fetch(`${API_URL}/api/auth/me`, {
       headers: {
         'Authorization': `Bearer ${data.access_token}`,
+        'ngrok-skip-browser-warning': 'true',
       },
     });
     
@@ -108,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
       },
       body: JSON.stringify({ email, username, password, full_name: username }),
     });
