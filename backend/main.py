@@ -32,7 +32,12 @@ print("=" * 60)
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://lagskill-arena-gaming.vercel.app",  # Vercel frontend
+        "https://supergigantic-superradically-lourie.ngrok-free.dev",  # ngrok URL
+        "http://localhost:5173",  # Local frontend
+        "http://localhost:5174",  # Local frontend alt port
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
