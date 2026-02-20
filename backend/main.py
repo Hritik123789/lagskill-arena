@@ -29,16 +29,11 @@ print("=" * 60)
 print("LOADING MAIN.PY WITH AUTHENTICATION")
 print("=" * 60)
 
-# CORS
+# CORS - Allow all origins for deployment
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://lagskill-arena-gaming.vercel.app",  # Vercel frontend
-        "https://supergigantic-superradically-lourie.ngrok-free.dev",  # ngrok URL
-        "http://localhost:5173",  # Local frontend
-        "http://localhost:5174",  # Local frontend alt port
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,  # Must be False when allow_origins is "*"
     allow_methods=["*"],
     allow_headers=["*"],
 )
