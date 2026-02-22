@@ -175,7 +175,7 @@ Strong positioning and reaction times. Consider:
 
 ## 📝 Documentation
 
-- [PROJECT_OVERVIEW.pdf](https://github.com/Hritik123789/lagskill-arena/blob/main/Project_Overview.pdf) - Complete project details, market analysis, and future scope
+- [PROJECT_OVERVIEW.pdf](https://github.com/Hritik123789/lagskill-arena/blob/main/Project_Overview%20(2).pdf) - Complete project details, market analysis, and future scope
 - [SETUP.md](SETUP.md) - Local development setup
 - [ROADMAP.md](ROADMAP.md) - Future features and plans
 
